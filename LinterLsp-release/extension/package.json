@@ -1,0 +1,208 @@
+{
+  "name": "linter-luau",
+  "displayName": "Linter for Luau",
+  "description": "Autocomplete for the things luau-lsp cannot see: dynamic module lists, custom require, _G/shared, shared tables, framework-supplied parameters. Includes the Luau language definition and grammar from the luau-lsp extension (MIT).",
+  "version": "0.1.5",
+  "publisher": "linter",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:luau",
+    "workspaceContains:**/*.luau",
+    "workspaceContains:**/default.project.json"
+  ],
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "linter.restart",
+        "title": "Linter: Restart"
+      },
+      {
+        "command": "linter.doctor",
+        "title": "Linter: Doctor (check setup)"
+      },
+      {
+        "command": "linter.report",
+        "title": "Linter: Show scripts only partly understood"
+      }
+    ],
+    "configuration": {
+      "title": "Linter",
+      "properties": {
+        "linter.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run Linter next to luau-lsp."
+        },
+        "linter.root": {
+          "type": "string",
+          "default": "",
+          "description": "Folder holding bridge/, server/, core/ (default: the extension's own copy)."
+        },
+        "linter.luauLspPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the luau-lsp binary (default: LUAU_LSP, PATH, or the JohnnyMorganz.luau-lsp extension's binary)."
+        },
+        "linter.luauLspArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra arguments for `luau-lsp lsp` (for example --definitions=..., --docs=...)."
+        },
+        "linter.lunePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Lune runtime (default: tools/lune in the runtime folder, then PATH)."
+        },
+        "linter.timeoutMs": {
+          "type": "number",
+          "default": 800,
+          "description": "How long a completion waits for Linter after luau-lsp has answered."
+        },
+        "linter.checkArguments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn about arguments whose type cannot match the parameter."
+        },
+        "linter.suggestArguments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer the parameter and allowed strings/enums inside f(."
+        },
+        "linter.suggestIndexes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer array positions after a dot (writes [1])."
+        },
+        "linter.suggestBracketKeys": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer names that cannot follow a dot as [\"Name\"]."
+        },
+        "linter.suggestAttributeNames": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer attribute and tag names inside GetAttribute(\" / HasTag(\"."
+        },
+        "linter.globalsScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Discover _G / shared members by evaluating scripts that write them."
+        },
+        "linter.contributorScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show what other modules write into a shared table."
+        },
+        "linter.hideUnderscore": {
+          "type": "boolean",
+          "default": false,
+          "description": "Treat _names as private."
+        },
+        "linter.trimStudioList": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove members marked --@Private/--@Hidden from luau-lsp's list too."
+        },
+        "linter.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "One log line per request."
+        },
+        "linter.checkMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "Point out a misspelled member of a table or child of an instance when a close name exists (\"Did you mean ...?\"), and calling a value that is not a function."
+        },
+        "linter.checkArgumentCount": {
+          "type": "boolean",
+          "default": false,
+          "description": "Point out more arguments than a function takes. Off by default: callbacks often get extra arguments on purpose."
+        },
+        "linter.checkMissingChildren": {
+          "type": "boolean",
+          "default": false,
+          "description": "Point out WaitForChild(\"X\") when the project files contain no X. Off by default: many children are created at run time."
+        },
+        "linter.hideMovedErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide luau-lsp's false \"not found\" errors for instances that a script moves into place at run time."
+        },
+        "linter.sourcemap.mode": {
+          "type": "string",
+          "enum": [
+            "off",
+            "project"
+          ],
+          "enumDescriptions": [
+            "Linter never writes anything into your project. A sourcemap.json that already exists is only read (default).",
+            "Linter asks Rojo to create and keep sourcemap.json in your project folder (this writes a file into the project)."
+          ],
+          "default": "off",
+          "description": "Whether Linter may create sourcemap.json for luau-lsp's game-tree types. Linter's own engine does not need it."
+        },
+        "linter.advanced": {
+          "type": "object",
+          "default": {},
+          "description": "Any other engine option (requestBudgetMs, moduleMs, maxItems ...)."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "luau",
+        "aliases": [
+          "Luau"
+        ],
+        "extensions": [
+          ".luau",
+          ".lua"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "luau",
+        "scopeName": "source.luau",
+        "path": "./syntaxes/Luau.tmLanguage.json",
+        "unbalancedBracketScopes": [
+          "keyword.operator.comparison",
+          "keyword.operator.type.function"
+        ],
+        "tokenTypes": {
+          "meta.template.expression": "other",
+          "meta.template.expression string": "string",
+          "meta.template.expression comment": "comment"
+        }
+      },
+      {
+        "scopeName": "markdown.luau.codeblock",
+        "path": "./syntaxes/codeblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.luau": "luau"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node ../scripts/test.js"
+  }
+}
